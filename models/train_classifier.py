@@ -77,6 +77,19 @@ def tokenize(text):
 
 
 def build_pipeline(clf, svd=False):
+    '''
+    Creates a scikit-learn pipeline to perform the machine learning analysis.
+    First applies the text normalization steps, then runs the train_classifier
+    in multi-output form to model the 35 message categories separately.
+
+    Args:
+        clf (sklearn object): the machine-learning train_classifier
+        svd (boolean): If True, use singular-value decomposition on the text for
+                       latent semantic analysis (LSA) dimensionality reduction.
+
+    Returns:
+        pipeline: sklearn Pipeline object
+    '''
     if svd:
     # add on the steps to do LSA
         pipeline = Pipeline([
@@ -95,9 +108,35 @@ def build_pipeline(clf, svd=False):
 
     return pipeline
 
-# took out print stmts here; either add here or as separate fxn code to make
-# this into a df and print means, etc.
-def get_results(model, y_test, y_pred, labels, cl_name, all_results):
+def get_results(model, y_test, y_pred, labels, cl_name):
+    '''
+    Prints the best parameters from GridSearchCV, along with name of classifier.
+    Evaluates the results of the trained model using sklearn's classification_report
+    (accuracy, precision, recall, and f1 score).
+    Prints the macro-average values for each of the 35 category columns.
+    Also calculates and prints the overall average for all categories.
+    Stores all of the classification_report results for later manipulation.
+
+
+    Args:
+        model (sklearn object): the trained classifier
+        y_test (numpy array): actual classification for each category
+        y_pred (numpy array): predicted classification for each category
+        labels (list): category names
+        cl_name (string): classifier name
+
+    Returns:
+        gscv_df (pandas dataframe): results from classification_report.
+                                    column names are result descriptions
+                                    rows are results for each category
+    '''
+
+    print('\nClassifier:', cl_name)
+    print('\nBest GridSearch Parameters:', model.best_params_)
+
+    # get the classification results for each category.
+    # saving to convert to dataframe for possible later use
+    all_results = []
     for i, label in enumerate(labels):
         result = classification_report(y_test[:,i], y_pred[:,i], output_dict=True)
         all_results.append([cl_name, label, result['0']['precision'], result['0']['recall'], \
@@ -105,68 +144,78 @@ def get_results(model, y_test, y_pred, labels, cl_name, all_results):
                             result['1']['recall'], result['1']['f1-score'], result['1']['support'],\
                             result['accuracy'], result['macro avg']['precision'],\
                             result['macro avg']['recall'],result['macro avg']['f1-score']])
-    return
+        print('\nCategory: ',label)
+        print('\nAccuracy: {:.4f}, Macro Avgs: Precision: {:.4f}, Recall: {:.4f}, F1: {:.4f}'\
+              .format(result['accuracy'], result['macro avg']['precision'],\
+              result['macro avg']['recall'],result['macro avg']['f1-score']))
 
-def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    # saving all of these columns in case when want to look in more detail later
+    gscv_df = pd.DataFrame(cv_results, columns=['classifier', 'category', 'precis_0', 'rcl_0', 'f1_0', 'support_0',\
+                                                'precis_1', 'rcl_1', 'f1_1', 'support_1','accuracy','ma_precision',\
+                                                'ma_recall', 'ma_f1'])
+    # get the overall average results
+    summary = gscv_df.groupby(['classifier'])[['accuracy', 'ma_precision', 'ma_recall', 'ma_f1']].mean()
+    print('Averaged Results: \n', summary)
 
+    return gscv_df
 
 def save_model(model, model_filepath):
-    pickle.dump(model, model_filepath)
+    '''
+    Saves the final model as a Python pkl file.
+
+    Args:
+        model (sklearn object): the trained classifier
+        model_filepath (string): path & filename for output file.
+                                 should end in '.pkl'
+
+    Returns:
+        none
+    '''
+    with open (model_filepath, 'wb') as outfile:
+        pickle.dump(model, outfile)
 
     return
 
 
-#def main():
+
 if __name__ == '__main__':
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
-        X, Y, labels = load_data(database_filepath)
-
+        X, y, labels = load_data(database_filepath)
 
 # split into train and validation sets
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y)
+        X_train, X_test, y_train, y_test = train_test_split(X, y)
 
         print('Building model...')
-        parameters = [
-                {
-                'vect__ngram_range': [(1,1),(1,2)],
-                'tfidf__use_idf': [True, False],
-                'multi_clf__estimator__n_estimators':  [100, 200],
-                'multi_clf__estimator__max_features': [0.5, "sqrt"]
-        }]
 
-
-        # create grid search object
-        # when I run this on my machine, putting n_jobs = -1 here seems to work
-        clf = RandomForestClassifier(random_state=42, n_jobs=-1)
+        # create classifer object and pipeline
+        clf = RandomForestClassifier(random_state=42, n_jobs=-1) # mutlithreading works here
         pipeline = build_pipeline(clf)
-        # the multithreading option doesn't seem to work in iPython according to what I can find (failed for me)
+
+        # create a gridsearch object to optimize the model
+        parameters = [{'vect__ngram_range': [(1,1),(1,2)],
+                       'tfidf__use_idf': [True, False],
+                       'multi_clf__estimator__n_estimators':  [100, 200],
+                       'multi_clf__estimator__max_features': [0.5, "sqrt"]}]
         # on my machine n_jobs > 1 here fails with some picking error I can't figure out. but it runs on the Udacity VM
-        cv = GridSearchCV(pipeline, param_grid=parameters, cv=2)
+        # I used cv=2 (instead of default 5) to get a somewhat reasonable runtime
+        gscv = GridSearchCV(pipeline, param_grid=parameters, cv=2)
 
         print('Training model...')
-        cv.fit(X_train, Y_train)
-        Y_pred = cv.predict(X_test)
+        gscv.fit(X_train, y_train)
+        y_pred = gscv.predict(X_test)
 
         print('Evaluating model...')
-#        evaluate_model(model, X_test, Y_test, category_names)
-        cv_results = []
+        # extract classifer name
         cl_name = str(type(clf)).split(".")[-1][:-2]   # thanks stack overflow
-        get_results(cv, Y_test, Y_pred, labels, cl_name, cv_results)
-        print("\nBest Parameters:", cv.best_params_)
-        cv_df = pd.DataFrame(cv_results, columns=['classifier', 'category', 'precis_0', 'rcl_0', 'f1_0', 'support_0',\
-                                                 'precis_1', 'rcl_1', 'f1_1', 'support_1','accuracy','ma_precision',\
-                                                 'ma_recall', 'ma_f1'])
-        summary = cv_df.groupby(['classifier'])[['accuracy', 'ma_precision', 'ma_recall', 'ma_f1']].mean()
-        print('Results: \n', summary)
+
+        # this returns a dataframe in case we want to do more detailed analysis
+        # for now, it's not being used for anything further
+        gscv_df = get_ressults(gscv, y_test, y_pred, labels, cl_name)
+
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
-
-        with open ('dist_test.pkl', 'wb') as outfile:
-            pickle.dump(cv, outfile)
-#        save_model(model, model_filepath)
-
+        save_model(cv, model_filepath)
         print('Trained model saved!')
 
     else:
@@ -174,7 +223,3 @@ if __name__ == '__main__':
               'as the first argument and the filepath of the pickle file to '\
               'save the model to as the second argument. \n\nExample: python '\
               'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
-
-
-#if __name__ == '__main__':
-#    main()
