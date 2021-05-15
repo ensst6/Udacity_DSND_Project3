@@ -10,11 +10,8 @@ from nltk.corpus import stopwords
 import re
 import numpy as np
 import pandas as pd
-from sklearn.base import BaseEstimator
 from sklearn.metrics import classification_report
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import SGDClassifier
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
@@ -200,7 +197,7 @@ if __name__ == '__main__':
                        'multi_clf__estimator__max_features': [0.5, "sqrt"]}]
         # on my machine n_jobs > 1 here fails with some picking error I can't figure out. but it runs on the Udacity VM
         # I used cv=2 (instead of default 5) to get a somewhat reasonable runtime
-        gscv = GridSearchCV(pipeline, param_grid=parameters, cv=2)
+        gscv = GridSearchCV(pipeline, param_grid=parameters, cv=2, scoring='f1')
 
         print('Training model...')
         gscv.fit(X_train, y_train)
@@ -212,10 +209,10 @@ if __name__ == '__main__':
 
         # this returns a dataframe in case we want to do more detailed analysis
         # for now, it's not being used for anything further
-        gscv_df = get_ressults(gscv, y_test, y_pred, labels, cl_name)
+        gscv_df = get_results(gscv, y_test, y_pred, labels, cl_name)
 
         print('Saving model...\n    MODEL: {}'.format(model_filepath))
-        save_model(cv, model_filepath)
+        save_model(gscv, model_filepath)
         print('Trained model saved!')
 
     else:
