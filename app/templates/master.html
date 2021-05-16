@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Disasters</title>
+    <title>Disasters-Response Message Classification</title>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -23,7 +23,7 @@
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 <li><a href="https://www.udacity.com/">Made with Udacity</a></li>
-                <li><a href="https://github.com/">Contact</a></li>
+                <li><a href="https://github.com/ensst6">Contact</a></li>
             </ul>
         </div>
     </div>
@@ -33,9 +33,9 @@
 <div class="jumbotron">
     <div class="container">
         <h1 class="text-center">Disaster Response Project</h1>
-        <p class="text-center">Analyzing message data for disaster response</p>
+        <p class="text-center">Categorizing message data for disaster responses</p>
         <hr />
-      
+
         <div class="row">
             <div class="col-lg-12 form-group-lg">
                 <form action="/go" method="get">
@@ -60,14 +60,18 @@
     {% endblock %}
 
     {% for id in ids %}
-        <div id="{{id}}"></div>
+        <div class="row">
+            <div class="col-12">
+                <div id="{{id}}"></div>
+            </div>
+        </div>
     {% endfor %}
 </div>
 
 <script type="text/javascript">
-    const graphs = {{graphJSON | safe}};
-    const ids = {{ids | safe}};
-    for(let i in graphs) {
+    var graphs = {{graphJSON | safe}};
+    var ids = {{ids | safe}};
+    for(var i in graphs) {
         Plotly.plot(ids[i], graphs[i].data, graphs[i].layout);
     }
 </script>
