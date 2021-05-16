@@ -1,16 +1,13 @@
 import json
 import plotly
 import pandas as pd
-import re
-import sys
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objects import Bar
 import joblib
 from sqlalchemy import create_engine
 
@@ -18,25 +15,13 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
-    '''
-    Normalizes, tokenizes, and lemmatizes a string of text.
-    Removes stopwords using nltk's stopwords dictionary.
-
-    Args:
-        text (str): a text string
-
-    Returns:
-        clean_tokens (list): a list of normalized, lemmatized text tokens
-                             derived from the original text string
-    '''
-    # normalize case and remove punctuation
-    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
-    # tokenize text
     tokens = word_tokenize(text)
-    # lemmatize & remove stopwords
     lemmatizer = WordNetLemmatizer()
-    clean_tokens = [lemmatizer.lemmatize(word) for word in tokens if word not\
-                    in stopwords.words('english')]
+
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
 
     return clean_tokens
 
@@ -54,39 +39,62 @@ model = joblib.load("../models/disaster_model.pkl")
 def index():
 
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # keep the default genre example
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
 
-    # create visuals
-    # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    #x=genre_names,
-                    #y=genre_counts
-                    x = ['a', 'b', 'c'],
-                    y = [1, 2, 3]
-                )
-            ],
+# get the top five and bottom 5 categories (excluding "Related") by percent of messages
+    totals = df.iloc[:, 5:].sum(axis = 0).sort_values()/(0.01*df.shape[0])
 
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
-    ]
+    # create visuals
+    graph_one = []
+    graph_one.append(
+     Bar(
+         x = genre_names,
+         y = genre_counts
+         )
+     )
+
+    layout_one = dict(title = 'Distribution of Message Genres',
+               xaxis = dict(title = 'Genre'),
+               yaxis = dict(title = 'Message Count'))
+
+
+    # top five categories by %
+    graph_two = []
+    graph_two.append(
+     Bar(
+         x = list(totals[-5:].index),
+         y = list(totals[-5:].values)
+         )
+     )
+
+    layout_two = dict(title = 'Five Most-Identified Categories (excludes Related)',
+               xaxis = dict(title = 'Category'),
+               yaxis = dict(title = 'Percent of Messages'))
+
+    # bottom five categories by %
+    graph_three = []
+    graph_three.append(
+     Bar(
+         x = list(totals[0:5].index),
+         y = list(totals[0:5].values)
+         )
+     )
+
+    layout_three = dict(title = 'Five Least-Identified Categories',
+               xaxis = dict(title = 'Category'),
+               yaxis = dict(title = 'Percent of Messages'))
+
+
+    graphs = []
+    graphs.append(dict(data=graph_one, layout=layout_one))
+    graphs.append(dict(data=graph_two, layout=layout_two))
+    graphs.append(dict(data=graph_three, layout=layout_three))
 
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
-
     # render web page with plotly graphs
     return render_template('master.html', ids=ids, graphJSON=graphJSON)
 
