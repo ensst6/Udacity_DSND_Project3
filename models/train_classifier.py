@@ -197,7 +197,7 @@ if __name__ == '__main__':
                        'multi_clf__estimator__max_features': [0.5, "sqrt"]}]
         # on my machine n_jobs > 1 here fails with some picking error I can't figure out. but it runs on the Udacity VM
         # I used cv=2 (instead of default 5) to get a somewhat reasonable runtime
-        gscv = GridSearchCV(pipeline, param_grid=parameters, cv=2, scoring='f1')
+        gscv = GridSearchCV(pipeline, param_grid=parameters, cv=2, scoring='f1_macro')
 
         print('Training model...')
         gscv.fit(X_train, y_train)
