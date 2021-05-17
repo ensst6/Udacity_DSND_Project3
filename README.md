@@ -107,7 +107,7 @@ This model has slightly improved recall at the expense of slighlty less precisio
 To try to further optimize, I keyed the scoring on F1 instead of on accuracy, since this should help optimize trade-off between precision and recall.
 
 ### Web App
-This was given to us by Udacity largely pre-coded. 
+This was given to us by Udacity largely pre-coded. The default view has an input box for a test message. Below it, visualizations of the test dataset are shown. These include number of messages by genre, and the top and bottom five categories by percent of messages (excluding the overarching category "related"). Typing in a message runs the ML model on it and highlights its estimated categories.
 
 ## Deployment  
 ### Prerequisites
@@ -118,14 +118,14 @@ For the ETL step, you will also need to download the fastText language identific
 Coded in `Python 3.8.5`.
 
 ## Instructions:
-1. Run the following commands in the project's root directory to set up your database and model. Note that you can name the database and pickle file whatever you want, but the database name you feed to both scripts needs to be the same.
+1. Run the following commands in the project's root directory to set up your database and model. The database and pickle file names are hard-coded into the web app, so it's suggested to keep them as below.
 
     - To run the ETL pipeline that cleans data and stores in database:  
-        `python3 data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
+        `python3 data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisResp.db`
     - To run the ML pipeline that trains the classifier and saves the model in a pkl file:  
-        `python3 models/train_classifier.py data/DisasterResponse.db models/disaster_model.pkl`
+        `python3 models/train_classifier.py data/DisResp.db models/disaster_model.pkl`
 
 2. Run the following command in the app's directory to run the web app:  
-    `python run.py`
+    `python3 run.py`
 
-3. Go to http://0.0.0.0:3001/ to view the app.
+3. Go to http://0.0.0.0:3001/ to view the app. Type in a message to classify. Click the "Disaster Response Project" link at the top to return to home screen. 
