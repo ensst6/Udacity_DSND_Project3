@@ -65,7 +65,8 @@ def index():
     graph_two.append(
      Bar(
          x = list(totals[-5:].index),
-         y = list(totals[-5:].values)
+         y = list(totals[-5:].values),
+         marker_color = 'green'
          )
      )
 
@@ -78,7 +79,8 @@ def index():
     graph_three.append(
      Bar(
          x = list(totals[0:5].index),
-         y = list(totals[0:5].values)
+         y = list(totals[0:5].values),
+         marker_color = 'red'
          )
      )
 
