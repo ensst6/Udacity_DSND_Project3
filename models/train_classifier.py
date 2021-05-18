@@ -147,7 +147,7 @@ def get_results(model, y_test, y_pred, labels, cl_name):
               result['macro avg']['recall'],result['macro avg']['f1-score']))
 
     # saving all of these columns in case when want to look in more detail later
-    gscv_df = pd.DataFrame(cv_results, columns=['classifier', 'category', 'precis_0', 'rcl_0', 'f1_0', 'support_0',\
+    gscv_df = pd.DataFrame(all_results, columns=['classifier', 'category', 'precis_0', 'rcl_0', 'f1_0', 'support_0',\
                                                 'precis_1', 'rcl_1', 'f1_1', 'support_1','accuracy','ma_precision',\
                                                 'ma_recall', 'ma_f1'])
     # get the overall average results
