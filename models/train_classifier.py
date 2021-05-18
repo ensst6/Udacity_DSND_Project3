@@ -38,7 +38,7 @@ def load_data(database_filepath):
         labels (list): labels for category columns
     '''
 # connect to the SQLite database
-    engine = create_engine('sqlite://'+database_filepath)
+    engine = create_engine('sqlite:///'+database_filepath)
 # extract the messages into X and the categories (multilabel output) into y
     df =pd.read_sql_table('messages', engine)
     X = df['message'].values
