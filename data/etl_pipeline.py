@@ -194,8 +194,8 @@ def main():
               'datasets as the first and second argument respectively.\n '\
               'The third argument should be the filepath of the database to save the cleaned data.\n '\
               'Finally, provide a path to the fastText model file lid.176.bin. \n'\
-              'Example: python3 etl_pipeline.py disaster_messages.csv disaster_categories.csv '\
-              'DisResp.db /tmp/lid.176.bin')
+              'Example: python3 data/etl_pipeline.py data/disaster_messages.csv data/disaster_categories.csv '\
+              'DisResp.db data/lid.176.bin')
 
 
 if __name__ == '__main__':
