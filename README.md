@@ -29,7 +29,7 @@ The `messages` table stores the final (translated) and original message (where a
 Preparatory steps for developing the ML pipeline were carried out in the Jupyter notebook `ML Pipeline Preparation.ipynb`. The final ETL steps are deployed in `train_classifier.py`. Either will automatically download the required [NLTK](https://www.nltk.org) files for language processing.  
 
 Initial ML development findings and steps:  
-1. Some of the categories are identified with very few messages. Three (`offer`, `tools`, `shops`) are associated with < 1%, and another 15 with < 5% (note the completely empty `child_alone` category has already been dropped). This may lead the classifier to try to maximize accuracy by not associating any message with these categories.
+1. Some of the categories are identified with very few messages. Three (`offer`, `tools`, `shops`) are associated with < 1%, and another 15 with < 5% (note the completely empty `child_alone` category has already been dropped). This may lead the classifier to try to maximize accuracy by not associating any message with these categories. Further optimization of the models shown below to better fit these rare categories would be a logical next step for this project.
 2. For the text tokenization step, text was converted to lowercase, punctuation and stopwords were removed (the latter with NLTK's "english" corpus), and stemmed with NLTK's WordNetLemmatizer. As explained below, limiting computational complexity turned out to be an important consideration.
 3. An additional step using latent semantic analysis (LSA) to reduce the dimensionality of the word vectors was also performed and compared to the model without it.
 4. For preliminary purposes, two ML classifiers with static parameters were compared. These were a linear support vector machine (SVM) with stochastic gradient descent (SGD) optimization, and a random forest classifier (RFC). Both were run with and without LSA.  
@@ -104,7 +104,15 @@ Best Parameters: {'multi_clf__estimator__max_features': 0.5, 'multi_clf__estimat
 
 This model has slightly improved recall at the expense of slighlty less precision, versus the two-parameter model above.
 
-To try to further optimize, I keyed the scoring on F1 instead of on accuracy, since this should help optimize trade-off between precision and recall.
+To try to further optimize, I keyed the scoring on F1 instead of on accuracy, since this should help optimize trade-off between precision and recall. The model and results changed slightly, but not much:
+```
+Best Parameters: {'multi_clf__estimator__max_features': 0.5, 'multi_clf__estimator__n_estimators': 200, 'tfidf__use_idf': True, 'vect__ngram_range': (1, 2)}
+```
+| Accuracy | MA precision | MA recall | MA F1 |  
+| -------- | ------------ | --------- | ----- |   
+| 0.947 | 0.764 | 0.676 | 0.699 |   
+
+Note that the script will print the results for all the individual categories, as well as the above averaged data.
 
 ### Web App
 This was given to us by Udacity largely pre-coded. The default view has an input box for a test message. Below it, visualizations of the test dataset are shown. These include number of messages by genre, and the top and bottom five categories by percent of messages (excluding the overarching category "related"). Typing in a message runs the ML model on it and highlights its estimated categories.
@@ -126,6 +134,12 @@ Coded in `Python 3.8.5`.
         `python3 models/train_classifier.py data/DisResp.db models/disaster_model.pkl`
 
 2. Run the following command in the app's directory to run the web app:  
-    `python3 run.py`
+    `python3 app/run.py`
 
-3. Go to http://0.0.0.0:3001/ to view the app. Type in a message to classify. Click the "Disaster Response Project" link at the top to return to home screen. 
+3. Go to http://0.0.0.0:3001/ to view the app. Type in a message to classify. Click the "Disaster Response Project" link at the top to return to home screen.
+
+## History
+Created May 17, 2021
+
+## License  
+[Licensed](license.md) under the [MIT License](https://spdx.org/licenses/MIT.html).
