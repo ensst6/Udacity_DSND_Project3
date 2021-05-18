@@ -129,7 +129,7 @@ Coded in `Python 3.8.5`.
 1. Run the following commands in the project's root directory to set up your database and model. The database and pickle file names are hard-coded into the web app, so it's suggested to keep them as below.
 
     - To run the ETL pipeline that cleans data and stores in database:  
-        `python3 data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisResp.db`
+        `python3 data/etl_pipeline.py data/disaster_messages.csv data/disaster_categories.csv data/DisResp.db data/lid.176.bin`
     - To run the ML pipeline that trains the classifier and saves the model in a pkl file:  
         `python3 models/train_classifier.py data/DisResp.db models/disaster_model.pkl`
 
