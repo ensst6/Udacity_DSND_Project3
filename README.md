@@ -121,7 +121,7 @@ This was given to us by Udacity largely pre-coded. The default view has an input
 ### Prerequisites
 See `requirements.txt`.  
 The Jupyter/iPython packages are only required if you want to run the notebooks containing the preliminary exploratory analyses and modeling.  
-For the ETL step, you will also need to download the fastText language identification model [ld.176.bin](https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin).
+For the ETL step, you will also need to download the [fastText language identification model](https://fasttext.cc/docs/en/language-identification.html) `lid.176.bin`.
 
 Coded in `Python 3.8.5`.
 
