@@ -126,15 +126,21 @@ For the ETL step, you will also need to download the fastText language identific
 Coded in `Python 3.8.5`.
 
 ## Instructions:
-1. Run the following commands in the project's root directory to set up your database and model. The database and pickle file names are hard-coded into the web app, so it's suggested to keep them as below.
+1. Run the following commands in the project's root directory to set up your database and model.  
 
     - To run the ETL pipeline that cleans data and stores in database:  
-        `python3 data/etl_pipeline.py data/disaster_messages.csv data/disaster_categories.csv data/DisResp.db data/lid.176.bin`
+        `python3 data/etl_pipeline.py data/disaster_messages.csv data/disaster_categories.csv data/DisResp.db data/lid.176.bin`  
+        The `.csv` files are the original dataset.  
+        The `.db` file is the SQlite database that will be created.  
+        The last argument is the path to the fastText language identification model.
     - To run the ML pipeline that trains the classifier and saves the model in a pkl file:  
-        `python3 models/train_classifier.py data/DisResp.db models/disaster_model.pkl`
+        `python3 models/train_classifier.py data/DisResp.db models/disaster_model.pkl`  
+        The `.db` file path & name should be the same as what you used for the ETL pipeline.
+        The `.pkl` file will output a model to be used by the web app.  
+        Since the paths for these are hard-coded in the web app, you should keep the names given above.
 
-2. Run the following command in the app's directory to run the web app:  
-    `python3 app/run.py`
+2. Run the following command in the app's directory (`/app`) to run the web app:  
+    `python3 run.py`
 
 3. Go to http://0.0.0.0:3001/ to view the app. Type in a message to classify. Click the "Disaster Response Project" link at the top to return to home screen.
 
